@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.26)
 project(DLLInjector_main)
 
-add_link_options(-static -static-libgcc -static-libstdc++)
+add_link_options(-static -static-libgcc -static-libstdc++ /SUBSYSTEM:WINDOWS)
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -11,6 +11,7 @@ add_executable(DLLInjector_main main.cpp
         inject.cpp
         inject.h
         gui.cpp
-        gui.h)
+        gui.h
+        setup.h)
 
 target_link_libraries(DLLInjector_main PRIVATE wx::core wx::base)

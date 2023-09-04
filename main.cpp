@@ -12,7 +12,9 @@
 #define DLL_PATH "C:\\Users\\vm\\Documents\\GitHub\\DLLInjector-main\\cmake-build-debug\\inject.dll"
 #define TARGET_BINARY "notepad.exe"
 
-int main() {
+wxIMPLEMENT_APP(GUI);
+
+bool Backend::Init() {
     // FIXME: ADD OS CHECKS HERE TO SETUP APPROPRIATE FILE HEADERS
     DWORD pid = 0;
     HANDLE hProc = nullptr;
@@ -24,6 +26,5 @@ int main() {
 
     loadLibrary(pid, hProc, lpBaseAddress, szPath);
 
-    return 0;
+    return true;
 }
-

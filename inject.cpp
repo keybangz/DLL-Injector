@@ -65,7 +65,7 @@ int loadLibrary(DWORD& pid, HANDLE& hProc, LPVOID& lpBaseAddress, size_t& szPath
 // FIXME: Update function to use a GUI selection.
 // UPDATE: findProcessByString?
 DWORD findProcessID() {
-    HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
+    HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     PROCESSENTRY32 pe32; // PE Header
 
     if(hSnap == INVALID_HANDLE_VALUE)
