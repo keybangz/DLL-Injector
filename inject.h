@@ -12,7 +12,7 @@
 #include <TlHelp32.h>
 #include <fileapi.h>
 
-int loadLibrary(DWORD pid, HANDLE hProc, LPVOID lpBaseAddress, size_t szPath);
+int loadLibrary(DWORD& pid, HANDLE& hProc, LPVOID& lpBaseAddress, size_t& szPath);
 DWORD findProcessID();
 BOOL FileExists(LPCTSTR szPath);
 

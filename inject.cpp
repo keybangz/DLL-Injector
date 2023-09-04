@@ -10,9 +10,9 @@
 
 // int inject(dword, handle, lpvoid, size_t)
 // uses standard loadlibrary to inject dll into desired process.
-int loadLibrary(DWORD pid, HANDLE hProc, LPVOID lpBaseAddress, size_t szPath) {
-    pid = findProcessID();
+int loadLibrary(DWORD& pid, HANDLE& hProc, LPVOID& lpBaseAddress, size_t& szPath) {
 
+    pid = findProcessID();
     // FIXME: We want to be stealing another applications base address later
     // Get handle to target process
     hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
@@ -22,7 +22,7 @@ int loadLibrary(DWORD pid, HANDLE hProc, LPVOID lpBaseAddress, size_t szPath) {
         return -1;
     }
 
-    if(!FileExists(DLL_PATH)) {
+    if(!FileExists(L"" DLL_PATH)) {
         printf("FILE DOES NOT EXIST!");
         return -1;
     }
@@ -79,16 +79,15 @@ DWORD findProcessID() {
         return FALSE;
     }
 
-    const char* exeName = TARGET_BINARY;
+    // idk why I didn't do this originally, should fix process finding errors.
+    const wchar_t* wTargetBin = L"" TARGET_BINARY;
 
     // Loop through list of processes running and select process user selected.
     do {
-        if (!strcmp((CHAR*)pe32.szExeFile, exeName))
+        if (!wcscmp(pe32.szExeFile, wTargetBin)) {
             return pe32.th32ProcessID;
+        }
     } while (Process32Next(hSnap, &pe32));
-
-    CloseHandle(hSnap);
-    return 0;
 }
 
 BOOL FileExists(LPCTSTR szPath) {

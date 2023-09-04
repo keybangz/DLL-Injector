@@ -1,4 +1,5 @@
 #include "inject.h"
+#include "gui.h"
 
 // DLL Injector
 // Primary goal is to give user options to inject a DLL to selected process (LoadLibrary & Manual Mapping)
@@ -12,7 +13,8 @@
 #define TARGET_BINARY "notepad.exe"
 
 int main() {
-    DWORD pid = NULL;
+    // FIXME: ADD OS CHECKS HERE TO SETUP APPROPRIATE FILE HEADERS
+    DWORD pid = 0;
     HANDLE hProc = nullptr;
     LPVOID lpBaseAddress = nullptr;
     size_t szPath = strlen(DLL_PATH);
