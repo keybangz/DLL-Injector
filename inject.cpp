@@ -8,6 +8,7 @@
 #define DLL_PATH "C:\\Users\\vm\\Documents\\GitHub\\DLLInjector-main\\cmake-build-debug\\inject.dll"
 #define TARGET_BINARY "notepad.exe"
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 // int inject(dword, handle, lpvoid, size_t)
 // uses standard loadlibrary to inject dll into desired process.
 int loadLibrary(DWORD& pid, HANDLE& hProc, LPVOID& lpBaseAddress, size_t& szPath) {
@@ -96,3 +97,5 @@ BOOL FileExists(LPCTSTR szPath) {
     return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
             !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
+
+#endif

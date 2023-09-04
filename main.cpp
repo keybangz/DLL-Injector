@@ -16,15 +16,17 @@ wxIMPLEMENT_APP(GUI);
 
 bool Backend::Init() {
     // FIXME: ADD OS CHECKS HERE TO SETUP APPROPRIATE FILE HEADERS
+
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
     DWORD pid = 0;
     HANDLE hProc = nullptr;
     LPVOID lpBaseAddress = nullptr;
     size_t szPath = strlen(DLL_PATH);
-
-    std::cout << "Basic DLL Injector v1.0\n" << "\n";
-    std::cout << "DLL Path: " << DLL_PATH << "\n";
-
     loadLibrary(pid, hProc, lpBaseAddress, szPath);
+#endif
+
+//    std::cout << "Basic DLL Injector v1.0\n" << "\n";
+//    std::cout << "DLL Path: " << DLL_PATH << "\n";
 
     return true;
 }
