@@ -8,6 +8,8 @@
 #include <iostream>
 #include <wx/wx.h>
 #include <wx/spinctrl.h>
+#include <wx/listctrl.h>
+#include <wx/combobox.h>
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 #include <tchar.h>
