@@ -32,6 +32,13 @@
 *.app
 
 .idea
+
+# windows build (msvc)
 cmake-build-debug-visual-studio
 cmake-build-release-visual-studio
 cmake-build-relwithdebinfo-visual-studio
+
+# linux build
+cmake-build-debug
+cmake-build-release
+cmake-build-relwithdebinfo
