@@ -1,3 +1,0 @@
-/home/wyattw/Documents/GitHub/DLL-Injector/cmake-build-debug/CMakeFiles/DLLInjector_main.dir
-/home/wyattw/Documents/GitHub/DLL-Injector/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/wyattw/Documents/GitHub/DLL-Injector/cmake-build-debug/CMakeFiles/rebuild_cache.dir
