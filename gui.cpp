@@ -36,8 +36,13 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
      */
 
     // PANELS
-    wxPanel* panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(400, 400)); // top panel
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+    wxPanel* panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(400, 200)); // top panel
     panel->SetBackgroundColour((wxColour(100, 100, 200))); // blue
+#elif __linux__
+    wxPanel* panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(400, 400)); // top panel
+#endif
+
     wxPanel* panel_mid = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(400, 100)); // middle
     panel->SetBackgroundColour((wxColour(100, 200, 200))); // yellow?
     wxPanel* panel_bot = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(400, 100)); // bottom panel
@@ -54,14 +59,20 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     // top panel
     wxListCtrl* injectListPtr = new wxListCtrl(panel, wxID_ANY, wxPoint(0, 20), wxSize(420, 200), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
 
-    // mid panel
+    // mid panel`
+
     wxRadioBox* processTypePtr = new wxRadioBox(panel_mid, wxID_ANY, "Process Type", wxPoint(0, 0), wxSize(420, 50), selProcessMethod);
-    wxStaticText* processTitlePtr = new wxStaticText(panel_mid, wxID_ANY, "Process:", wxPoint(0,65), wxSize(420, 20));
+    wxStaticText* processTitlePtr = new wxStaticText(panel_mid, wxID_ANY, "Process:", wxPoint(5,65), wxSize(45, 20));
     wxComboBox* processTargetComboPtr = new wxComboBox(panel_mid, wxID_ANY, "Select process", wxPoint(55, 60), wxDefaultSize, testChoices, wxCB_READONLY);
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+    wxButton* selectDllPtr = new wxButton(panel_mid, wxID_ANY, "Add File", wxPoint(140, 60), wxDefaultSize);
+    wxButton* removeDllPtr = new wxButton(panel_mid, wxID_ANY, "Remove File", wxPoint(230, 60), wxDefaultSize);
+    wxButton* clearDllPtr = new wxButton(panel_mid, wxID_ANY, "Clear List", wxPoint(330, 60), wxDefaultSize);
+#elif __linux__
     wxButton* selectDllPtr = new wxButton(panel_mid, wxID_ANY, "Add File", wxPoint(150, 60), wxDefaultSize);
     wxButton* removeDllPtr = new wxButton(panel_mid, wxID_ANY, "Remove File", wxPoint(240, 60), wxDefaultSize);
     wxButton* clearDllPtr = new wxButton(panel_mid, wxID_ANY, "Clear List", wxPoint(335, 60), wxDefaultSize);
-
+#endif
     // bottom left panel
     wxButton* injectButtonPtr = new wxButton(panel_bot, wxID_ANY, "Inject", wxPoint(0, 0), wxDefaultSize);
 
