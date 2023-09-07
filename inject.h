@@ -7,11 +7,13 @@
 
 #include "setup.h"
 
+class Inject {
+public:
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-int loadLibrary(DWORD& pid, HANDLE& hProc, LPVOID& lpBaseAddress, size_t& szPath);
-DWORD findProcessID();
-BOOL FileExists(LPCTSTR szPath);
+    static int loadLibrary(DWORD& pid, HANDLE& hProc, LPVOID& lpBaseAddress, wxString& path, size_t& szPath);
+    static DWORD findProcessID(const wchar_t* target);
 #elif __linux__
 #endif
+};
 
 #endif //DLLINJECTOR_MAIN_INJECT_H

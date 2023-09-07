@@ -4,27 +4,22 @@
 
 #include "inject.h"
 
-// FIXME: Change to user-selected process & DLL's
-#define DLL_PATH "C:\\Users\\vm\\Documents\\GitHub\\DLLInjector-main\\cmake-build-debug\\inject.dll"
-#define TARGET_BINARY "notepad.exe"
-
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 // int inject(dword, handle, lpvoid, size_t)
 // uses standard loadlibrary to inject dll into desired process.
-int loadLibrary(DWORD& pid, HANDLE& hProc, LPVOID& lpBaseAddress, size_t& szPath) {
+int Inject::loadLibrary(DWORD& pid, HANDLE& hProc, LPVOID& lpBaseAddress, wxString& path, size_t& szPath) {
 
-    pid = findProcessID();
+    if(pid == 0) {
+        printf("error: somehow pid check returned 0");
+        return -1;
+    }
+
     // FIXME: We want to be stealing another applications base address later
     // Get handle to target process
     hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
 
     if(!hProc) {
         printf("PROCESS NOT FOUND!");
-        return -1;
-    }
-
-    if(!FileExists(L"" DLL_PATH)) {
-        printf("FILE DOES NOT EXIST!");
         return -1;
     }
 
@@ -38,7 +33,7 @@ int loadLibrary(DWORD& pid, HANDLE& hProc, LPVOID& lpBaseAddress, size_t& szPath
     printf("Memory allocate at 0x%X\n", (UINT)(uintptr_t)lpBaseAddress);
 
     // Write DLL path to the target binary's memory
-    const DWORD dwWriteResult = WriteProcessMemory(hProc, lpBaseAddress, DLL_PATH, szPath, nullptr);
+    const DWORD dwWriteResult = WriteProcessMemory(hProc, lpBaseAddress, path, szPath, nullptr);
     if(dwWriteResult == 0) {
         printf("An error occured trying to write DLL path to target process.");
         return -1;
@@ -65,7 +60,7 @@ int loadLibrary(DWORD& pid, HANDLE& hProc, LPVOID& lpBaseAddress, size_t& szPath
 
 // FIXME: Update function to use a GUI selection.
 // UPDATE: findProcessByString?
-DWORD findProcessID() {
+DWORD Inject::findProcessID(const wchar_t* target) {
     HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     PROCESSENTRY32 pe32; // PE Header
 
@@ -80,22 +75,12 @@ DWORD findProcessID() {
         return FALSE;
     }
 
-    // idk why I didn't do this originally, should fix process finding errors.
-    const wchar_t* wTargetBin = L"" TARGET_BINARY;
-
     // Loop through list of processes running and select process user selected.
     do {
-        if (!wcscmp(pe32.szExeFile, wTargetBin)) {
+        if (!wcscmp(pe32.szExeFile, target)) {
             return pe32.th32ProcessID;
         }
     } while (Process32Next(hSnap, &pe32));
-}
-
-BOOL FileExists(LPCTSTR szPath) {
-    DWORD dwAttrib = GetFileAttributes(szPath);
-
-    return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
-            !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 #endif

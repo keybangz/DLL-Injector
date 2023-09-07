@@ -4,6 +4,18 @@
 
 #include "gui.h"
 
+BEGIN_EVENT_TABLE(GUIFrame, wxFrame)
+    EVT_BUTTON(addDllButton, GUIFrame::addDLLHandler)
+    EVT_BUTTON(injectButton, GUIFrame::injectHandler)
+    EVT_BUTTON(removeDllButton, GUIFrame::removeDllHandler)
+    EVT_BUTTON(clearInjectButton, GUIFrame::clearInjectHandler)
+END_EVENT_TABLE()
+
+wxArrayString Backend::processList;
+
+wxListCtrl* injectListPtr = nullptr;
+wxComboBox* processTargetComboPtr = nullptr;
+
 // wxWidgets uses this function as new main.
 bool GUI::OnInit() {
     Backend::Init();
@@ -18,11 +30,6 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     wxArrayString selProcessMethod;
     selProcessMethod.Add("Existing Process");
     selProcessMethod.Add("New Process");
-
-    wxArrayString testChoices;
-    testChoices.Add("Item 1");
-    testChoices.Add("Item 2");
-    testChoices.Add("Item 3");
 
     /*
      * COMPONENT LAYOUT
@@ -45,7 +52,7 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
 
     wxPanel* panel_mid = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(400, 100)); // middle
     panel->SetBackgroundColour((wxColour(100, 200, 200))); // yellow?
-    wxPanel* panel_bot = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(400, 100)); // bottom panel
+    wxPanel* panel_bot = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(400, 50)); // bottom panel
     panel_bot->SetBackgroundColour((wxColour(100, 200, 100))); // green
 
     // CREATE SIZERS USED FOR LAYOUT
@@ -53,20 +60,19 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     wxSizer* sizer_middle = new wxBoxSizer(wxHORIZONTAL);
     wxSizer* sizer_bot = new wxBoxSizer(wxHORIZONTAL);
     wxSizer* sizer_inject = new wxBoxSizer(wxVERTICAL);
-    wxSizer* sizer_btn_bot = new wxBoxSizer(wxHORIZONTAL);
 
     // COMPONENTS
     // top panel
-    wxListCtrl* injectListPtr = new wxListCtrl(panel, wxID_ANY, wxPoint(0, 20), wxSize(420, 200), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
+    injectListPtr = new wxListCtrl(panel, wxID_ANY, wxPoint(0, 20), wxSize(420, 200), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
 
     // mid panel`
 
     wxRadioBox* processTypePtr = new wxRadioBox(panel_mid, wxID_ANY, "Process Type", wxPoint(0, 0), wxSize(420, 50), selProcessMethod);
     wxStaticText* processTitlePtr = new wxStaticText(panel_mid, wxID_ANY, "Process:", wxPoint(5,65), wxSize(45, 20));
-    wxComboBox* processTargetComboPtr = new wxComboBox(panel_mid, wxID_ANY, "Select process", wxPoint(55, 60), wxDefaultSize, testChoices, wxCB_READONLY);
+    processTargetComboPtr = new wxComboBox(panel_mid, wxID_ANY, "Select process", wxPoint(50, 60), wxSize(80, 45), Backend::processList, wxCB_READONLY);
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-    wxButton* selectDllPtr = new wxButton(panel_mid, wxID_ANY, "Add File", wxPoint(140, 60), wxDefaultSize);
-    wxButton* removeDllPtr = new wxButton(panel_mid, wxID_ANY, "Remove File", wxPoint(230, 60), wxDefaultSize);
+    wxButton* selectDllPtr = new wxButton(panel_mid, addDllButton, "Add File", wxPoint(140, 60), wxDefaultSize);
+    wxButton* removeDllPtr = new wxButton(panel_mid, removeDllButton, "Remove File", wxPoint(230, 60), wxDefaultSize);
     wxButton* clearDllPtr = new wxButton(panel_mid, wxID_ANY, "Clear List", wxPoint(330, 60), wxDefaultSize);
 #elif __linux__
     wxButton* selectDllPtr = new wxButton(panel_mid, wxID_ANY, "Add File", wxPoint(150, 60), wxDefaultSize);
@@ -74,20 +80,19 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     wxButton* clearDllPtr = new wxButton(panel_mid, wxID_ANY, "Clear List", wxPoint(335, 60), wxDefaultSize);
 #endif
     // bottom left panel
-    wxButton* injectButtonPtr = new wxButton(panel_bot, wxID_ANY, "Inject", wxPoint(0, 0), wxDefaultSize);
+    wxButton* injectButtonPtr = new wxButton(panel_bot, injectButton, "Inject", wxPoint(100, 15), wxDefaultSize);
+    wxButton* advancedButtonPtr = new wxButton(panel_bot, injectButton, "Advanced", wxPoint(200, 15), wxDefaultSize);
 
     // SETUP DLL INJECTION LIST
     injectListPtr->InsertColumn(0, "DLL Name", NULL, 210);
     injectListPtr->InsertColumn(1, "Architecture", NULL, 215);
-    long index =  injectListPtr->InsertItem(0, "Placeholder DLL");
-    injectListPtr->SetItem(index, 1, "x64");
 
     // LAYOUT PROJECT WITH SIZERS & PADDING
     sizer->Add(panel, 1, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 5);
     sizer_middle->Add(panel_mid, 1, wxBOTTOM, 5);
     sizer_bot->Add(panel_bot, 1,  wxRIGHT | wxBOTTOM, 5);
     sizer->Add(sizer_middle, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 5);
-    sizer->Add(sizer_bot, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 5);
+    sizer->Add(sizer_bot, 0, wxEXPAND, 5);
 
     // ADD OTHER COMPONENTS TO SIZER & ADJUST
     // sizer_inject->Add(titlePtr, 0, wxEXPAND | wxLEFT, 0);
@@ -101,6 +106,69 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     // SEE: injectList declaration - parent panel is first panel created.
     panel->SetSizerAndFit(sizer_inject);
 }
+
+// EVENTS
+
+void GUIFrame::addDLLHandler(wxCommandEvent &e) {
+    //wxMessageBox("Test Add DLL BUTTON");
+    wxFileDialog* dllSelected = new wxFileDialog(this, "Open DLL File", "", "", ".dll files (*.dll)|*.dll", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+    if (dllSelected->ShowModal() == wxID_CANCEL)
+        return;
+
+    wxFileInputStream input_stream(dllSelected->GetPath());
+    if (!input_stream.IsOk()) {
+        wxLogError("Cannot open file '%s'.", dllSelected->GetPath());
+        return;
+    }
+
+    if (dllSelected->ShowModal() == wxID_OK) {
+        long index = injectListPtr->InsertItem(0, dllSelected->GetFilename());
+        injectListPtr->SetItem(index, 1, dllSelected->GetPath());
+        return;
+    }
+}
+
+void GUIFrame::removeDllHandler(wxCommandEvent &e) {
+    long index = injectListPtr->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+
+    if(index != wxNOT_FOUND) {
+        injectListPtr->DeleteItem(index);
+    }
+}
+
+void GUIFrame::injectHandler(wxCommandEvent &e) {
+    long index = injectListPtr->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+
+    // grab first item if none selected.
+    if(index == -1) {
+        for(int i = 0; i < injectListPtr->GetItemCount(); i++) {
+            if(i >> 0 && !injectListPtr->GetItemState(i, wxLIST_STATE_SELECTED)) {
+                index = i;
+                break;
+            }
+        }
+    }
+
+    if (index != wxNOT_FOUND) {
+        wxString path = injectListPtr->GetItemText(index, 1);
+        wxString selProc = processTargetComboPtr->GetStringSelection();
+
+        std::wstring ProcConvert = std::wstring(selProc.begin(), selProc.end());
+        const wchar_t* curProc = ProcConvert.c_str();
+
+        DWORD pid = Inject::findProcessID(curProc);
+        HANDLE hProc = nullptr;
+        LPVOID lpBaseAddress = nullptr;
+        size_t szPath = strlen(path);
+        Inject::loadLibrary(pid, hProc, lpBaseAddress, path, szPath);
+    }
+}
+
+void GUIFrame::clearInjectHandler(wxCommandEvent &e) {
+    injectListPtr->DeleteAllItems();
+}
+
 
 /*  GUIFrame(title, pos, size,) : wxFrame(parent, ID, title, pos, size)
 
