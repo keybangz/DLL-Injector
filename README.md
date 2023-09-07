@@ -1,6 +1,9 @@
 # DLL-Injector
 A work in progress cross platform DLL injector with support for LoadLibrary &amp; manual mapping.
 
+## Preview - Alpha (Windows)
+![image](https://github.com/keybangz/DLL-Injector/assets/23132897/55fffbef-e90d-4a91-be6e-c994e51410cc)
+
 ## Preview - Development (Linux)
 ![image](https://github.com/keybangz/DLL-Injector/assets/23132897/61204aee-3270-4013-8289-de4da333de7a)
 
