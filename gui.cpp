@@ -19,6 +19,11 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     selProcessMethod.Add("Existing Process");
     selProcessMethod.Add("New Process");
 
+    wxArrayString testChoices;
+    testChoices.Add("Item 1");
+    testChoices.Add("Item 2");
+    testChoices.Add("Item 3");
+
     /*
      * COMPONENT LAYOUT
      * The current application is divided into three panels (1x 1/2 vertical && 2x 1/2 horizontal)
@@ -35,23 +40,31 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     panel->SetBackgroundColour((wxColour(100, 100, 200))); // blue
     wxPanel* panel_mid = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(400, 100)); // middle
     panel->SetBackgroundColour((wxColour(100, 200, 200))); // yellow?
-    wxPanel* panel_bot_r = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(210, 200)); // bottom right panel
-    panel_bot_r->SetBackgroundColour((wxColour(100, 200, 100))); // green
-    wxPanel* panel_bot_l = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(210, 200)); // bottom left panel
-    panel_bot_l->SetBackgroundColour((wxColour(200, 100, 100))); // blue
+    wxPanel* panel_bot = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(400, 100)); // bottom panel
+    panel_bot->SetBackgroundColour((wxColour(100, 200, 100))); // green
 
     // CREATE SIZERS USED FOR LAYOUT
     wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     wxSizer* sizer_middle = new wxBoxSizer(wxHORIZONTAL);
     wxSizer* sizer_bot = new wxBoxSizer(wxHORIZONTAL);
     wxSizer* sizer_inject = new wxBoxSizer(wxVERTICAL);
+    wxSizer* sizer_btn_bot = new wxBoxSizer(wxHORIZONTAL);
 
     // COMPONENTS
+    // top panel
     wxStaticText* titlePtr = new wxStaticText(panel, wxID_ANY, "DLL INJECTOR (v1.0) by keybangz", wxPoint(0, 0), wxSize(400, 20), wxALIGN_CENTRE_HORIZONTAL);
     wxListCtrl* injectListPtr = new wxListCtrl(panel, wxID_ANY, wxPoint(0, 20), wxSize(420, 200), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
-    wxRadioBox* processTypePtr = new wxRadioBox(panel_mid, wxID_ANY, "Process Type", wxPoint(0, 40), wxSize(420, 50), selProcessMethod);
-    wxStaticText* processTitlePtr = new wxStaticText(panel_mid, wxID_ANY, "Process:", wxPoint(0,5), wxSize(400, 20));
-    wxComboBox* processTargetComboPtr = new wxComboBox(panel_mid, wxID_ANY, "Select process.", wxPoint(60, 0), wxDefaultSize);
+
+    // mid panel
+    wxRadioBox* processTypePtr = new wxRadioBox(panel_mid, wxID_ANY, "Process Type", wxPoint(0, 0), wxSize(420, 50), selProcessMethod);
+    wxStaticText* processTitlePtr = new wxStaticText(panel_mid, wxID_ANY, "Process:", wxPoint(0,65), wxSize(420, 20));
+    wxComboBox* processTargetComboPtr = new wxComboBox(panel_mid, wxID_ANY, "Select process", wxPoint(55, 60), wxDefaultSize, testChoices, wxCB_READONLY);
+    wxButton* selectDllPtr = new wxButton(panel_mid, wxID_ANY, "Add File", wxPoint(150, 60), wxDefaultSize);
+    wxButton* removeDllPtr = new wxButton(panel_mid, wxID_ANY, "Remove File", wxPoint(240, 60), wxDefaultSize);
+    wxButton* clearDllPtr = new wxButton(panel_mid, wxID_ANY, "Clear List", wxPoint(335, 60), wxDefaultSize);
+
+    // bottom left panel
+    wxButton* injectButtonPtr = new wxButton(panel_bot, wxID_ANY, "Inject", wxPoint(0, 0), wxDefaultSize);
 
     // SETUP DLL INJECTION LIST
     injectListPtr->InsertColumn(0, "DLL Name", NULL, 210);
@@ -60,10 +73,9 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     injectListPtr->SetItem(index, 1, "x64");
 
     // LAYOUT PROJECT WITH SIZERS & PADDING
-    sizer->Add(panel, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 5);
-    sizer_middle->Add(panel_mid, 1, wxEXPAND | wxBOTTOM, 0);
-    sizer_bot->Add(panel_bot_l, 0,  wxRIGHT | wxBOTTOM, 5);
-    sizer_bot->Add(panel_bot_r, 0, wxBOTTOM, 5);
+    sizer->Add(panel, 1, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 5);
+    sizer_middle->Add(panel_mid, 1, wxBOTTOM, 5);
+    sizer_bot->Add(panel_bot, 1,  wxRIGHT | wxBOTTOM, 5);
     sizer->Add(sizer_middle, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 5);
     sizer->Add(sizer_bot, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 5);
 
@@ -71,8 +83,6 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     sizer_inject->Add(titlePtr, 0, wxEXPAND | wxLEFT, 0);
     // FIXME: Can't add components to sizer if different type. (wxWidgets checks for byte size and compares?)
     sizer_inject->Add(injectListPtr, 0, wxEXPAND | wxLEFT, 0);
-
-    //sizer_middle->Add(processMethodPtr, 0, wxEXPAND | wxLEFT | wxRIGHT, 5);
 
     // FIT TO FRAME
     this->SetSizerAndFit(sizer);
