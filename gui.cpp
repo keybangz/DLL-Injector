@@ -8,7 +8,7 @@
 bool GUI::OnInit() {
     Backend::Init();
 
-    GUIFrame *frame = new GUIFrame("DLL Injector (v1.0)", wxPoint(50, 50), wxSize(450, 200));
+    GUIFrame *frame = new GUIFrame("DLL Injector (v1.0) by keybangz", wxPoint(50, 50), wxSize(450, 200));
     frame->Show( true );
     frame->Center();
     return true;
@@ -52,7 +52,6 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
 
     // COMPONENTS
     // top panel
-    wxStaticText* titlePtr = new wxStaticText(panel, wxID_ANY, "DLL INJECTOR (v1.0) by keybangz", wxPoint(0, 0), wxSize(400, 20), wxALIGN_CENTRE_HORIZONTAL);
     wxListCtrl* injectListPtr = new wxListCtrl(panel, wxID_ANY, wxPoint(0, 20), wxSize(420, 200), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
 
     // mid panel
@@ -80,7 +79,7 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     sizer->Add(sizer_bot, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 5);
 
     // ADD OTHER COMPONENTS TO SIZER & ADJUST
-    sizer_inject->Add(titlePtr, 0, wxEXPAND | wxLEFT, 0);
+    // sizer_inject->Add(titlePtr, 0, wxEXPAND | wxLEFT, 0);
     // FIXME: Can't add components to sizer if different type. (wxWidgets checks for byte size and compares?)
     sizer_inject->Add(injectListPtr, 0, wxEXPAND | wxLEFT, 0);
 
