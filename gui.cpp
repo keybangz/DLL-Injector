@@ -9,18 +9,26 @@ BEGIN_EVENT_TABLE(GUIFrame, wxFrame)
     EVT_BUTTON(injectButton, GUIFrame::injectHandler)
     EVT_BUTTON(removeDllButton, GUIFrame::removeDllHandler)
     EVT_BUTTON(clearInjectButton, GUIFrame::clearInjectHandler)
+    EVT_BUTTON(advancedButton, GUIFrame::advancedButtonHandler)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(advancedFrame, wxFrame)
+    EVT_RADIOBOX(injectTypeState, advancedFrame::injectTypeBox)
 END_EVENT_TABLE()
 
 wxArrayString Backend::processList;
 
 wxListCtrl* injectListPtr = nullptr;
 wxComboBox* processTargetComboPtr = nullptr;
+wxRadioBox* injectType = nullptr;
+
+bool bInjectType = false; // false loadlibrary true manual map
 
 // wxWidgets uses this function as new main.
 bool GUI::OnInit() {
     Backend::Init();
 
-    GUIFrame *frame = new GUIFrame("DLL Injector (v1.0) by keybangz", wxPoint(50, 50), wxSize(450, 200));
+    GUIFrame *frame = new GUIFrame("DLL Injector (v1.1) by keybangz", wxPoint(50, 50), wxSize(450, 200));
     frame->Show( true );
     frame->Center();
     return true;
@@ -45,15 +53,15 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     // PANELS
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
     wxPanel* panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(400, 200)); // top panel
-    panel->SetBackgroundColour((wxColour(100, 100, 200))); // blue
+    //panel->SetBackgroundColour((wxColour(100, 100, 200))); // blue
 #elif __linux__
     wxPanel* panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(400, 400)); // top panel
 #endif
 
     wxPanel* panel_mid = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(400, 100)); // middle
-    panel->SetBackgroundColour((wxColour(100, 200, 200))); // yellow?
+    //panel_mid->SetBackgroundColour((wxColour(100, 200, 200))); // yellow?
     wxPanel* panel_bot = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(400, 50)); // bottom panel
-    panel_bot->SetBackgroundColour((wxColour(100, 200, 100))); // green
+    //panel_bot->SetBackgroundColour((wxColour(100, 200, 100))); // green
 
     // CREATE SIZERS USED FOR LAYOUT
     wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
@@ -63,17 +71,17 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
 
     // COMPONENTS
     // top panel
-    injectListPtr = new wxListCtrl(panel, wxID_ANY, wxPoint(0, 20), wxSize(420, 200), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
+    injectListPtr = new wxListCtrl(panel, wxID_ANY, wxPoint(0, 20), wxSize(400, 200), wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
 
     // mid panel`
 
     wxRadioBox* processTypePtr = new wxRadioBox(panel_mid, wxID_ANY, "Process Type", wxPoint(0, 0), wxSize(420, 50), selProcessMethod);
     wxStaticText* processTitlePtr = new wxStaticText(panel_mid, wxID_ANY, "Process:", wxPoint(5,65), wxSize(45, 20));
-    processTargetComboPtr = new wxComboBox(panel_mid, wxID_ANY, "Select process", wxPoint(50, 60), wxSize(80, 45), Backend::processList, wxCB_READONLY);
+    processTargetComboPtr = new wxComboBox(panel_mid, wxID_ANY, "Select process", wxPoint(50, 60), wxSize(90, 45), Backend::processList, wxCB_READONLY);
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-    wxButton* selectDllPtr = new wxButton(panel_mid, addDllButton, "Add File", wxPoint(140, 60), wxDefaultSize);
+    wxButton* selectDllPtr = new wxButton(panel_mid, addDllButton, "Add File", wxPoint(150, 60), wxDefaultSize);
     wxButton* removeDllPtr = new wxButton(panel_mid, removeDllButton, "Remove File", wxPoint(230, 60), wxDefaultSize);
-    wxButton* clearDllPtr = new wxButton(panel_mid, wxID_ANY, "Clear List", wxPoint(330, 60), wxDefaultSize);
+    wxButton* clearDllPtr = new wxButton(panel_mid, clearInjectButton, "Clear List", wxPoint(320, 60), wxDefaultSize);
 #elif __linux__
     wxButton* selectDllPtr = new wxButton(panel_mid, wxID_ANY, "Add File", wxPoint(150, 60), wxDefaultSize);
     wxButton* removeDllPtr = new wxButton(panel_mid, wxID_ANY, "Remove File", wxPoint(240, 60), wxDefaultSize);
@@ -81,18 +89,19 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
 #endif
     // bottom left panel
     wxButton* injectButtonPtr = new wxButton(panel_bot, injectButton, "Inject", wxPoint(100, 15), wxDefaultSize);
-    wxButton* advancedButtonPtr = new wxButton(panel_bot, injectButton, "Advanced", wxPoint(200, 15), wxDefaultSize);
+    wxButton* advancedButtonPtr = new wxButton(panel_bot, advancedButton, "Advanced", wxPoint(200, 15), wxDefaultSize);
 
     // SETUP DLL INJECTION LIST
     injectListPtr->InsertColumn(0, "DLL Name", NULL, 210);
-    injectListPtr->InsertColumn(1, "Architecture", NULL, 215);
+    injectListPtr->InsertColumn(1, "Path", NULL, 215);
+    // FIXME: Add binary machine type detection and display on injector
 
     // LAYOUT PROJECT WITH SIZERS & PADDING
-    sizer->Add(panel, 1, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 5);
-    sizer_middle->Add(panel_mid, 1, wxBOTTOM, 5);
-    sizer_bot->Add(panel_bot, 1,  wxRIGHT | wxBOTTOM, 5);
-    sizer->Add(sizer_middle, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 5);
-    sizer->Add(sizer_bot, 0, wxEXPAND, 5);
+    sizer->Add(panel, 1, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 0);
+    sizer_middle->Add(panel_mid, 1, wxBOTTOM, 0);
+    sizer_bot->Add(panel_bot, 1,  wxBOTTOM | wxLEFT | wxRIGHT, 0);
+    sizer->Add(sizer_middle, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 0);
+    sizer->Add(sizer_bot, 0, wxEXPAND, 0);
 
     // ADD OTHER COMPONENTS TO SIZER & ADJUST
     // sizer_inject->Add(titlePtr, 0, wxEXPAND | wxLEFT, 0);
@@ -122,11 +131,8 @@ void GUIFrame::addDLLHandler(wxCommandEvent &e) {
         return;
     }
 
-    if (dllSelected->ShowModal() == wxID_OK) {
-        long index = injectListPtr->InsertItem(0, dllSelected->GetFilename());
-        injectListPtr->SetItem(index, 1, dllSelected->GetPath());
-        return;
-    }
+    long index = injectListPtr->InsertItem(0, dllSelected->GetFilename());
+    injectListPtr->SetItem(index, 1, dllSelected->GetPath());
 }
 
 void GUIFrame::removeDllHandler(wxCommandEvent &e) {
@@ -143,7 +149,7 @@ void GUIFrame::injectHandler(wxCommandEvent &e) {
     // grab first item if none selected.
     if(index == -1) {
         for(int i = 0; i < injectListPtr->GetItemCount(); i++) {
-            if(i >> 0 && !injectListPtr->GetItemState(i, wxLIST_STATE_SELECTED)) {
+            if(injectListPtr->GetItemState(i, wxLIST_STATE_SELECTED) != wxNOT_FOUND) {
                 index = i;
                 break;
             }
@@ -161,7 +167,18 @@ void GUIFrame::injectHandler(wxCommandEvent &e) {
         HANDLE hProc = nullptr;
         LPVOID lpBaseAddress = nullptr;
         size_t szPath = strlen(path);
-        Inject::loadLibrary(pid, hProc, lpBaseAddress, path, szPath);
+
+        if(!bInjectType) { // loadlibrary
+            Inject::loadLibrary(pid, hProc, lpBaseAddress, path, szPath);
+        } else { // manual map
+            if(!Inject::ManualMap(pid, path)) {
+                CloseHandle(hProc);
+                printf("Something went wrong!\n");
+                system("PAUSE");
+            }
+
+            CloseHandle(hProc);
+        }
     }
 }
 
@@ -169,6 +186,34 @@ void GUIFrame::clearInjectHandler(wxCommandEvent &e) {
     injectListPtr->DeleteAllItems();
 }
 
+void GUIFrame::advancedButtonHandler(wxCommandEvent &e) {
+    advancedFrame *frame = new advancedFrame("Settings", wxPoint(50, 50), wxSize(300, 300));
+    frame->Show( true );
+    frame->Center();
+}
+
+advancedFrame::advancedFrame(const wxString& title, const wxPoint& pos, const wxSize& size) : wxFrame(NULL, wxID_ANY, title, pos, size, wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER) {
+    wxArrayString selInjectType;
+    selInjectType.Add("LoadLibrary");
+    selInjectType.Add("Manual Map");
+
+    wxPanel* panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(300, 300));
+    panel->SetBackgroundColour((wxColour(100, 100, 200)));
+
+    injectType = new wxRadioBox(panel, injectTypeState, "Injection Method", wxPoint(0, 0), wxSize(200, 0), selInjectType);
+
+    if(!bInjectType)
+        injectType->SetSelection(0);
+    else
+        injectType->SetSelection(1);
+}
+
+void advancedFrame::injectTypeBox(wxCommandEvent &e) {
+    if(injectType->GetSelection() == injectType->FindString("LoadLibrary"))
+        bInjectType = false;
+    else if(injectType->GetSelection() == injectType->FindString("Manual Map"))
+        bInjectType = true;
+}
 
 /*  GUIFrame(title, pos, size,) : wxFrame(parent, ID, title, pos, size)
 

@@ -18,6 +18,7 @@
 #include <tchar.h>
 #include <TlHelp32.h>
 #include <fileapi.h>
+#include <fstream>
 #endif
 #include <cwchar>
 

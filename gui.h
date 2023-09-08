@@ -13,6 +13,7 @@ enum ButtonId {
     removeDllButton,
     clearInjectButton,
     advancedButton,
+    injectTypeState,
     otherButton
 };
 
@@ -36,6 +37,16 @@ public:
     void injectHandler(wxCommandEvent &e);
     void removeDllHandler(wxCommandEvent &e);
     void clearInjectHandler(wxCommandEvent &e);
+    void advancedButtonHandler(wxCommandEvent &e);
+
+    DECLARE_EVENT_TABLE()
+};
+
+class advancedFrame: public wxFrame {
+public:
+    advancedFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
+
+    void injectTypeBox(wxCommandEvent &e);
 
     DECLARE_EVENT_TABLE()
 };
