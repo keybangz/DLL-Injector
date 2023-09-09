@@ -9,9 +9,12 @@
 
 // copy dll image to target process address space > copy loader code > do relocations > resolve imports & TLS, find entry point and call.
 // FIXME: add windows check
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 using f_LoadLibraryA = HINSTANCE(WINAPI*)(const char* lpLibName);
 using f_GetProcAddr = UINT_PTR(WINAPI*)(HINSTANCE hModule, const char* lpProcName);
 using f_DllEntryP = BOOL(WINAPI*)(void* hDll, DWORD dwReason, void* pReserved);
+#elif __linux__
+#endif
 
 class Inject {
 public:

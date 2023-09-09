@@ -76,16 +76,18 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     // mid panel`
 
     wxRadioBox* processTypePtr = new wxRadioBox(panel_mid, wxID_ANY, "Process Type", wxPoint(0, 0), wxSize(420, 50), selProcessMethod);
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
     wxStaticText* processTitlePtr = new wxStaticText(panel_mid, wxID_ANY, "Process:", wxPoint(5,65), wxSize(45, 20));
     processTargetComboPtr = new wxComboBox(panel_mid, wxID_ANY, "Select process", wxPoint(50, 60), wxSize(90, 45), Backend::processList, wxCB_READONLY);
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
     wxButton* selectDllPtr = new wxButton(panel_mid, addDllButton, "Add File", wxPoint(150, 60), wxDefaultSize);
     wxButton* removeDllPtr = new wxButton(panel_mid, removeDllButton, "Remove File", wxPoint(230, 60), wxDefaultSize);
     wxButton* clearDllPtr = new wxButton(panel_mid, clearInjectButton, "Clear List", wxPoint(320, 60), wxDefaultSize);
 #elif __linux__
-    wxButton* selectDllPtr = new wxButton(panel_mid, wxID_ANY, "Add File", wxPoint(150, 60), wxDefaultSize);
-    wxButton* removeDllPtr = new wxButton(panel_mid, wxID_ANY, "Remove File", wxPoint(240, 60), wxDefaultSize);
-    wxButton* clearDllPtr = new wxButton(panel_mid, wxID_ANY, "Clear List", wxPoint(335, 60), wxDefaultSize);
+    wxStaticText* processTitlePtr = new wxStaticText(panel_mid, wxID_ANY, "Process:", wxPoint(5,65), wxSize(45, 20));
+    processTargetComboPtr = new wxComboBox(panel_mid, wxID_ANY, "Select process", wxPoint(60, 60), wxSize(80, 30), Backend::processList, wxCB_READONLY);
+    wxButton* selectDllPtr = new wxButton(panel_mid, addDllButton, "Add File", wxPoint(150, 60), wxSize(80, 30));
+    wxButton* removeDllPtr = new wxButton(panel_mid, removeDllButton, "Remove File", wxPoint(240, 60), wxSize(80, 30));
+    wxButton* clearDllPtr = new wxButton(panel_mid, clearInjectButton, "Clear List", wxPoint(330, 60), wxSize(80, 30));
 #endif
     // bottom left panel
     wxButton* injectButtonPtr = new wxButton(panel_bot, injectButton, "Inject", wxPoint(100, 15), wxDefaultSize);
@@ -163,6 +165,8 @@ void GUIFrame::injectHandler(wxCommandEvent &e) {
         std::wstring ProcConvert = std::wstring(selProc.begin(), selProc.end());
         const wchar_t* curProc = ProcConvert.c_str();
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+
         DWORD pid = Inject::findProcessID(curProc);
         HANDLE hProc = nullptr;
         LPVOID lpBaseAddress = nullptr;
@@ -179,6 +183,9 @@ void GUIFrame::injectHandler(wxCommandEvent &e) {
 
             CloseHandle(hProc);
         }
+
+#elif __linux__
+#endif
     }
 }
 
