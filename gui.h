@@ -21,6 +21,9 @@ class Backend {
 public:
     static bool Init();
     static wxArrayString processList;
+#if __linux
+    static wxArrayString processListFull;
+#endif
 };
 
 class GUI: public wxApp {

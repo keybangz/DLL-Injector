@@ -19,6 +19,16 @@
 #include <TlHelp32.h>
 #include <fileapi.h>
 #include <fstream>
+#elif __linux
+#include <sys/types.h>
+#include <dirent.h>
+#include <errno.h>
+#include <vector>
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
+#include <stdio.h>
 #endif
 #include <cwchar>
 

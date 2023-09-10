@@ -17,6 +17,9 @@ BEGIN_EVENT_TABLE(advancedFrame, wxFrame)
 END_EVENT_TABLE()
 
 wxArrayString Backend::processList;
+#if __linux
+wxArrayString Backend::processListFull;
+#endif
 
 wxListCtrl* injectListPtr = nullptr;
 wxComboBox* processTargetComboPtr = nullptr;
@@ -83,11 +86,11 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     wxButton* removeDllPtr = new wxButton(panel_mid, removeDllButton, "Remove File", wxPoint(230, 60), wxDefaultSize);
     wxButton* clearDllPtr = new wxButton(panel_mid, clearInjectButton, "Clear List", wxPoint(320, 60), wxDefaultSize);
 #elif __linux__
-    wxStaticText* processTitlePtr = new wxStaticText(panel_mid, wxID_ANY, "Process:", wxPoint(5,65), wxSize(45, 20));
-    processTargetComboPtr = new wxComboBox(panel_mid, wxID_ANY, "Select process", wxPoint(60, 60), wxSize(80, 30), Backend::processList, wxCB_READONLY);
+    wxStaticText* processTitlePtr = new wxStaticText(panel_mid, wxID_ANY, "Process:", wxPoint(0,65), wxSize(50, 20));
+    processTargetComboPtr = new wxComboBox(panel_mid, wxID_ANY, "Select process", wxPoint(55, 60), wxSize(90, 30), Backend::processList, wxCB_READONLY);
     wxButton* selectDllPtr = new wxButton(panel_mid, addDllButton, "Add File", wxPoint(150, 60), wxSize(80, 30));
-    wxButton* removeDllPtr = new wxButton(panel_mid, removeDllButton, "Remove File", wxPoint(240, 60), wxSize(80, 30));
-    wxButton* clearDllPtr = new wxButton(panel_mid, clearInjectButton, "Clear List", wxPoint(330, 60), wxSize(80, 30));
+    wxButton* removeDllPtr = new wxButton(panel_mid, removeDllButton, "Remove File", wxPoint(235, 60), wxSize(80, 30));
+    wxButton* clearDllPtr = new wxButton(panel_mid, clearInjectButton, "Clear List", wxPoint(320, 60), wxSize(80, 30));
 #endif
     // bottom left panel
     wxButton* injectButtonPtr = new wxButton(panel_bot, injectButton, "Inject", wxPoint(100, 15), wxDefaultSize);
@@ -122,7 +125,11 @@ GUIFrame::GUIFrame(const wxString& title, const wxPoint& pos, const wxSize& size
 
 void GUIFrame::addDLLHandler(wxCommandEvent &e) {
     //wxMessageBox("Test Add DLL BUTTON");
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
     wxFileDialog* dllSelected = new wxFileDialog(this, "Open DLL File", "", "", ".dll files (*.dll)|*.dll", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+#elif __linux
+    wxFileDialog* dllSelected = new wxFileDialog(this, "Open SO File", "", "", ".so files (*.so)|*.so", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+#endif
 
     if (dllSelected->ShowModal() == wxID_CANCEL)
         return;
